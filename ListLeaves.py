@@ -4,6 +4,7 @@ right = 2
 n = int(input())
 tr = []
 leaves = []
+
 def gen(tree,n):
     biao = [0]*n
     for i in range(n):
@@ -36,8 +37,6 @@ def sortt(tree,root,n):
                 continue        
     return res
 
-
-
 for i in range(n):
     k=[]
     q = input().split()
@@ -51,6 +50,7 @@ for i in range(n):
     else:
         k.append(-1)
     tr.append(k)
+    
 root = gen(tr,n)
 mid = sortt(tr,root,n)
 
