@@ -3,16 +3,17 @@ class tr(object):
  		self.left = None
  		self.right = None
  		self.data = data
+ 		self.flag = 0
 
 #获得编码的字符数。
 def get_nums_codes():
 	return int(input())
 
-#获得待验证的组数。
+#获得待验证编码的组数。
 def get_nums_lists():
 	return int(input())
 
-#返回包括四个字典的列表。
+#返回包括四个字典的列表{字符：二进制编码}。
 def get_codes(n_codes,n_lists):
 	res = []
 	for i in range(n_lists):
@@ -75,6 +76,7 @@ def cal_by_list(dic,fre):
 		res = res+(zhi*rate)
 	return res
 
+#计算huffman树的wpl。
 def cal_by_tree(ht):
 	q = []
 	res = []
@@ -92,7 +94,7 @@ def cal_by_tree(ht):
 			continue                             
 	return sum(res)
 
-#每次检查一组编码,需要一个编码(字符串)的二进制以及相应的哈夫曼树
+#前缀检查。每次检查一组编码,需要一个编码(字符串)的二进制以及相应的哈夫曼树
 def pre_check(codes,root):
 	res = True
 	mid = root
@@ -103,13 +105,17 @@ def pre_check(codes,root):
 				root = root.left
 			else:
 				root = root.right
-		if root.left and root.right:
+		if root.flag == 1:
+			res = False
+		if root.left or root.right:
 			res = False
 			break
 		else:
+			root.flag = 1
 			continue
 	return res
 
+#建立huffman树。
 def build_huf(hea):
     while hea[2]:
     	left = hea[1]
@@ -122,6 +128,7 @@ def build_huf(hea):
     	hea = insert_min(par,hea)
     return hea[1]
 
+#获得最小堆的size
 def get_size(hea):
 	k = 0
 	while k < len(hea):
@@ -131,6 +138,7 @@ def get_size(hea):
 			break
 	return k-1
 
+#删除最小堆的根。
 def delete_min(hea):
 	tmp = hea[1]
 	size = get_size(hea)
@@ -179,6 +187,7 @@ def insert_min(nod,hea):
 			k = k//2
 	return hea
 
+#建立最小堆。
 def build_min(nodes,hea):
 	j = insert_min(nodes[0],hea)
 	for x in nodes[1:]:
@@ -190,40 +199,50 @@ def main():
 	n1 = get_nums_codes()   #每组的编码数
 	heap = [tr(-1)]+n1*[None]
 	fre = get_fre(n1)
-	lis = []
+	lis = []      			#出现的频数
 	for key in fre:
 		lis.append(fre[key])
 	nodes = create_node(lis)
 	r = build_min(nodes,heap)
 	huf_tree = build_huf(r)
-	n2 = get_nums_lists()  #待查组的个数
+	n2 = get_nums_lists()   #待查组的个数
 	#2.由建好的堆建huffman树,算出最小权值。
 	standard = cal_by_tree(huf_tree)
-	#3.通过二进制编码建立二叉树。
-	code_and_key = get_codes(n1,n2) #编码与频率的字典
-	bianma = []
-	for x in code_and_key:
-		song = []
-		code_root = []
-		for key in x:
-			song.append(x[key])
-		bianma.append(song)
-		code_root.append(build_by_code(song))
-	#4.通过建立的二叉树进行前缀检查。
-	res = []  #记录前缀检查的结果
-	for i in range(len(code_root)):  #函数每次检查一个根节点。
-		res.append(pre_check(bianma[i],code_root[i]))
-	#5.由编码长度和fre字典算出待测编码组的权值。
-	min_nums = [] 
-	for dicts in code_and_key:   #根据具体情况修改存储方式。
+	#3.通过最小权值检查各组树
+	code_and_key = get_codes(n1,n2)
+	min_nums = []
+	val_check = n2*[True] 
+	for dicts in code_and_key:   
 		min_nums.append(cal_by_list(dicts,fre))
 
-	#6.通过最小权值筛选编码组。
 	for i in range(len(min_nums)):
 		if min_nums[i] != standard:
-			res[i] = False
-	#7.若同时通过前缀检查和权值检查则打印yes,否则
-	for z in res:
+			val_check[i] = False
+	#4.通过二进制编码建树，之前未通过的编码组就不用建了。
+	bianma = n2*[None]
+	code_root = n2*[None]
+	for i in range(len(code_and_key)):
+		if val_check[i] == False:
+			continue
+		song = []
+		for key in code_and_key[i]:
+			if len(code_and_key[i][key])>63:
+				song = False
+				break
+			song.append(code_and_key[i][key])
+		bianma[i] = song
+		code_root[i] = build_by_code(song)
+	#5.对通过的编码进行前缀检查。
+	for i in range(len(code_root)):
+		#函数每次检查一个根节点。
+		if not code_root[i]:
+			continue
+		if not bianma[i]:
+			continue
+		else:
+			val_check[i] = pre_check(bianma[i],code_root[i])
+	#6.若同时通过前缀检查和权值检查则打印yes,否则
+	for z in val_check:
 		if z:
 			print('Yes')
 		else:
