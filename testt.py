@@ -1,56 +1,130 @@
-def bfs_change(n_node,start_nodes,zuobiao,distance):
-	que = []
-	path = n_node*[-1]
-	dist = n_node*[-1]
-	for x in start_nodes:
-		dist[x] = 1
-	while start_nodes!=[]:
-		que.append(start_nodes.pop())
-	while que!=[]:
-		k = que.pop()
-		for i in range(n_node):
-			if i == k:
-				continue
-			if ((zuobiao[k][0]-zuobiao[i][0])**2+(zuobiao[k][1]-zuobiao[i][1])**2)<=distance**2:
-				if dist[i] == -1:
-					dist[i] = dist[k]+1
-					path[i] = k
-					que.insert(0,i)
-	return path,dist
+def insertion_sort():
+	n_nums = int(input())
+	nums = [int(x) for x in input().split()]
+	for i in range(1,n_nums):
+		print(nums)   #题目中的every iteration是指在这一步进行iteration。
+		tmp = nums[i]
+		count = i
+		while count>0:
+			if nums[count-1]>tmp:
+				nums[count] = nums[count-1]
+				count -= 1
+			else:
+				break
+		nums[count] = tmp
+	print(" ".join([str(x) for x in nums]))
 
 
+######
+def merge(left,right,right_end,nums,temp_list):
+	left_end = right - 1
+	begin = left
+	temp = left
+	while left<=left_end and right<=right_end:
+		if nums[left] <= nums[right]:
+			temp_list[temp] = nums[left]
+			left += 1
+			temp += 1
+		else:
+			temp_list[temp] = nums[right]
+			right += 1
+			temp += 1
+	if left <= left_end:
+		for i in range(left,left_end+1):
+			temp_list[temp] = nums[i]
+			temp += 1
+	if right <= right_end:
+		for i in range(right,right_end+1):
+			temp_list[temp] = nums[i]
+			temp += 1
+	nums[begin:right_end+1] = temp_list[begin:right_end+1]
+	return nums
 
-def main():	
-	n_node = 17
-	distance = 15
-	zuobiao = [[10,-21],[10,21],[-40,10],[30,-50],[20,40],[35,10],[0,-10],[-25,22],[40,-40],[-30,30],[-10,22],[0,11],[25,21],[25,10],[10,10],[10,35],[-30,10]]
-	start_nodes = [] #存第一落脚点的下标
-	for i in range(len(zuobiao)):
-		if (distance+7.5)**2 >= (zuobiao[i][0]**2+zuobiao[i][1]**2):
-			start_nodes.append(i)
-	path,dist = bfs_change(n_node,start_nodes,zuobiao,distance)
+#递归调用，最小元的操作依赖于merge()函数
+def Msort(nums,left,right_end,temp_list):
+	if left < right_end:
+		center = (right_end+left)//2
+		Msort(nums,left,center,temp_list)
+		Msort(nums,center+1,right_end,temp_list)
+		merge(left,center+1,right_end,nums,temp_list)
+	return nums
 
-	#############################################
-	shangan = -2
-	for i in range(n_node):
-		print(shangan)
-		if dist[i]==-1:
-			continue
-		if zuobiao[i][0]>=(50-distance) or zuobiao[i][0]<=(distance-50) or zuobiao[i][1]>=(50-distance) or zuobiao[i][1]<=(distance-50):
-			if shangan == -2:
-				shangan = i
-			elif dist[shangan]>=dist[i]:
-				shangan = i
-	if shangan == -2:
-		print('0')
-  #对于这个例子来说，shangan应该是12
-	stack = []
-	stack.append(path[shangan])
-	flag = path[shangan]
-	while dist[flag]!=1:
-		stack.append(path[flag])
-		flag = path[flag]
-	while stack!=[]:
-		print(zuobiao[stack.pop()])	
-main()
+def merge_sort_recursive(nums):
+	left = 0
+	right_end = len(nums)-1
+	temp_list = [-1]*len(nums)
+	a = Msort(nums,left,right_end,temp_list)
+	return a
 
+###迭代法
+#merge_pass是干嘛的:每次迭代并归一次
+#!!!!!有问题
+def merge_pass(nums,temp_list,length,n):
+	i = 0
+	while i<=n-2*length:
+		merge(i,i+length,i+2*length-1,nums,temp_list)   #虽然不返回temp_list但是仍然改变temp_list
+		i += 2*length
+	if i+length < n:
+		merge(i,i+length,n-1,nums,temp_list)
+	else:
+		temp_list[i:] = nums[i:]
+
+def merge_sort_iterative(nums):
+	n = len(nums)
+	temp_list = [-1]*n
+	length = 1
+	while length<n:
+		merge_pass(nums,temp_list,length,n)
+		length = length*2
+		print(nums)
+		merge_pass(temp_list,nums,length,n)
+		length = length*2
+		print(nums)
+	return temp_list
+
+def main():
+	n = int(input())
+	if n == 1:
+		num = int(input())
+		print(num)
+		return
+	nums = [int(x) for x in input().split()]
+	res = merge_sort_iterative(nums)
+	print(" ".join([str(x) for x in res]))
+
+
+#堆排序！！！！！！！——————————————
+
+def heap_sort(nums):
+	n = len(nums)-1
+	while True:
+		k = nums[:]
+		nums = adjust_heap(nums,n)
+		if k==nums:
+			break
+	print(k)
+
+def adjust_heap(nums,n):
+	i = 0
+	while i*2+1!=n and i*2+2!=n:    #最后一个非叶节点的判断依据
+		i+=1
+	while i>=0:
+		#对当前节点(非叶节点)进行调整
+		if 2*i+1 == n:   #单儿子
+			if nums[2*i+1] > nums[i]:
+				tmp = nums[2*i+1]
+				nums[2*i+1] = nums[i]
+				nums[i] = tmp
+		elif 2*i+2 <= n:   #双儿子
+			max_val = max(nums[2*i+1],nums[2*i+2])
+			if max_val > nums[i]:
+				if max_val == nums[2*i+1]:
+					nums[2*i+1] = nums[i]
+					nums[i] = max_val
+				else:
+					nums[2*i+2] = nums[i]
+					nums[i] = max_val
+		i -=1
+	return nums
+
+heap_sort([46,77,55,38,41,85])
