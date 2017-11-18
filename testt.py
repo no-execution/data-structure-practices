@@ -95,14 +95,14 @@ def main():
 
 #堆排序！！！！！！！——————————————
 
-def heap_sort(nums):
+def heap_pass(nums):
 	n = len(nums)-1
 	while True:
 		k = nums[:]
 		nums = adjust_heap(nums,n)
 		if k==nums:
 			break
-	print(k)
+	return nums
 
 def adjust_heap(nums,n):
 	i = 0
@@ -127,4 +127,31 @@ def adjust_heap(nums,n):
 		i -=1
 	return nums
 
-heap_sort([46,77,55,38,41,85])
+def delete_max(nums,size):   #size代表队尾的位置
+	tmp = nums[0]
+	nums[0] = nums[size]
+	x = nums[size]
+	nums[size] = tmp
+	size -= 1
+	k = 0
+	while 2*k+1<=size:
+		child = 2*k+1
+		if child!=size and nums[child]<nums[child+1]:
+			child += 1
+		if nums[k] >= nums[child]:
+			break
+		else:
+			mid = nums[k]
+			nums[k] = nums[child]
+			nums[child] = mid
+			k = child
+	nums[k] = x
+	return nums
+
+def heap_sort(nums):
+	size = len(nums) - 1
+	nums = heap_pass(nums)
+	while size > 0:
+		nums = delete_max(nums,size)
+		size -= 1
+		
