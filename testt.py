@@ -155,3 +155,31 @@ def heap_sort(nums):
 		nums = delete_max(nums,size)
 		size -= 1
 		
+#————————————————快速排序————————————————
+#从给出的数组中找出中位数pivot,并将其放到倒数第二(第一位存最小值，最末尾存最大值)的位置
+#因为对于整个快速排序，目标数组是在不断变化的，所以给出的是待排数组在整个大数组中的位置
+def get_pivot(nums,left,right):
+	center = (left+right)//2
+	if nums[left] > nums[center]:
+		tmp = nums[left]
+		nums[left] = nums[center]
+		nums[center] = tmp
+	if nums[center] > nums[right]:
+		tmp = nums[center]
+		nums[center] = nums[right]
+		nums[right] = tmp
+	if nums[left] > nums[center]:
+		tmp = nums[left]
+		nums[left] = nums[center]
+		nums[center] = tmp
+	tmp = nums[center]
+	nums[center] = nums[right-1]
+	nums[right-1] = tmp
+	return nums[right-1]
+
+def quick_sort(nums,left,right):
+	if (right-left) >= cutoff：    #cutoff代表使用quicksort的界限比如:超过100个数使用cutoff
+		pivot = get_pivot(nums,left,right)
+		low,high = left-1,right-2
+		while True:
+			while nums[low]
