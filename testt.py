@@ -1,8 +1,6 @@
-def insertion_sort():
-	n_nums = int(input())
-	nums = [int(x) for x in input().split()]
+def insertion_sort(nums):
+	n_nums = len(nums)
 	for i in range(1,n_nums):
-		print(nums)   #题目中的every iteration是指在这一步进行iteration。
 		tmp = nums[i]
 		count = i
 		while count>0:
@@ -178,8 +176,33 @@ def get_pivot(nums,left,right):
 	return nums[right-1]
 
 def quick_sort(nums,left,right):
-	if (right-left) >= cutoff：    #cutoff代表使用quicksort的界限比如:超过100个数使用cutoff
+	cutoff = 2
+	if (right-left) >= cutoff:    #cutoff代表使用quicksort的界限比如:超过100个数使用cutoff
 		pivot = get_pivot(nums,left,right)
-		low,high = left-1,right-2
+		low,high = left+1,right-2
 		while True:
-			while nums[low]
+			while nums[low] < pivot:
+				low += 1
+			while nums[high] > pivot:
+				high -= 1
+			if low < high:
+				tmp = nums[low]
+				nums[low] = nums[high]
+				nums[high] = tmp
+			else:
+				break
+		nums[right-1] = nums[low]
+		nums[low] = pivot
+		quick_sort(nums,left,low-1)
+		quick_sort(nums,low+1,right)
+	else:
+		insertion_sort(nums)
+	return nums
+
+def qsort(nums):
+	left = 0
+	right = len(nums) - 1
+	quick_sort(nums,left,right)
+	return nums
+
+print(qsort([1,3,5,7,9,2,4,6,8]))
